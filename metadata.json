@@ -1,0 +1,6 @@
+{
+  "name": "Panda AI",
+  "description": "Liquid Glass design showcase for Panda AI Agent, featuring premium visual styling, animated background orbs, frosted cards, and conversational flow.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
