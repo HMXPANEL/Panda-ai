@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -280,17 +282,6 @@ class PandaViewModel(application: Application) : AndroidViewModel(application) {
                 }
             
             _aiState.value = AiState.Idle
-        }
-    }
-
-    fun startVoiceListening() {
-        _aiState.value = AiState.Listening
-    }
-
-    fun stopVoiceListeningAndSend(text: String) {
-        _aiState.value = AiState.Idle
-        if (text.isNotBlank()) {
-            sendMessage(text)
         }
     }
 

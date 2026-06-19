@@ -33,7 +33,10 @@ import com.example.ui.AiState
 import com.example.ui.BottomTab
 import com.example.ui.PandaViewModel
 import com.example.ui.components.GlassCard
+import com.example.ui.components.GlassDivider
+import com.example.ui.components.LiquidGlassInputField
 import com.example.ui.components.LiquidPandaSphere
+import com.example.ui.components.MediumLiquidGlassCard
 import com.example.ui.theme.*
 
 @Composable
