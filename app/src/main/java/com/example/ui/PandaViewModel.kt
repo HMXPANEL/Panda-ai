@@ -1,10 +1,12 @@
 package com.example.ui
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.BuildConfig
 import com.example.data.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +19,7 @@ enum class ScreenState {
 enum class BackgroundStyle { Orbs, Ripple, Gradient, Pulse }
 
 enum class BottomTab {
-    Home, Chat, Tools, Memories, Settings
+    Home, Chat, Tools, Settings
 }
 
 enum class AiState {
@@ -180,6 +182,41 @@ class PandaViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { repository.saveSetting("background_style", style.name) }
     }
 
+    private var voiceRecognizer: VoiceRecognizer? = null
+    private var voiceScope: CoroutineScope? = null
+
+    fun startVoiceListening(context: Context) {
+        _aiState.value = AiState.Listening
+        voiceRecognizer = VoiceRecognizer(context.applicationContext)
+        voiceScope = CoroutineScope(Dispatchers.IO)
+        voiceScope?.launch {
+            voiceRecognizer?.startListening()?.consumeEach { text ->
+                stopVoiceListeningAndSend(text)
+            }
+        }
+    }
+
+    fun stopVoiceListening() {
+        voiceRecognizer?.stopListening()
+        voiceScope?.cancel()
+        voiceRecognizer = null
+        voiceScope = null
+        if (_aiState.value == AiState.Listening) {
+            _aiState.value = AiState.Idle
+        }
+    }
+
+    fun stopVoiceListeningAndSend(text: String) {
+        voiceRecognizer?.destroy()
+        voiceScope?.cancel()
+        voiceRecognizer = null
+        voiceScope = null
+        _aiState.value = AiState.Idle
+        if (text.isNotBlank()) {
+            sendMessage(text)
+        }
+    }
+
     // --- Permissions Toggles ---
 
     fun toggleAccessibility(granted: Boolean? = null) {
@@ -235,19 +272,12 @@ class PandaViewModel(application: Application) : AndroidViewModel(application) {
             // 3. Prepare streaming response
             val botMessageId = repository.insertMessage(ChatMessage(text = "...", isUser = false)).toInt()
             
-            val isDemo = _userApiKey.value.isEmpty() || (_userApiKey.value == "MY_GEMINI_API_KEY" && BuildConfig.GEMINI_API_KEY.isEmpty())
-            
-            if (isDemo) {
-                val reply = generateCutePandaReply(text)
-                repository.updateMessage(ChatMessage(id = botMessageId, text = reply, isUser = false))
-            } else {
-                var fullResponse = ""
-                GeminiNetwork.queryGeminiStream(text, _userApiKey.value, _activeModelName.value)
-                    .collect { chunk ->
-                        fullResponse += chunk
-                        repository.updateMessage(ChatMessage(id = botMessageId, text = fullResponse, isUser = false))
-                    }
-            }
+            var fullResponse = ""
+            GeminiNetwork.queryGeminiStream(text, _userApiKey.value, _activeModelName.value)
+                .collect { chunk ->
+                    fullResponse += chunk
+                    repository.updateMessage(ChatMessage(id = botMessageId, text = fullResponse, isUser = false))
+                }
             
             _aiState.value = AiState.Idle
         }
@@ -268,20 +298,6 @@ class PandaViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.clearChat()
             repository.insertMessage(ChatMessage(text = "Hello ${_userName.value}! Welcome back. What can I automate for you today?", isUser = false))
-        }
-    }
-
-    private fun generateCutePandaReply(userText: String): String {
-        val lower = userText.lowercase()
-        return when {
-            lower.contains("hello") || lower.contains("hi") -> "Hey there ${_userName.value}! 👋 Ready to tackle your day together!"
-            lower.contains("tesla") || lower.contains("instagram") -> "Done! Checked Instagram and fetched search catalogs for Tesla Roadster. High-glowing specs loaded into your browser!"
-            lower.contains("what can you do") || lower.contains("capabilities") -> "I can manage your workspace, open apps, search the web, track memories, set alarms, and control Bluetooth! Tap any tool card under 'Tools' to try."
-            lower.contains("mumbai") || lower.contains("live") -> "Oh, Mumbai! The city of dreams 🌟. Let me know if you want local weather updates or quick restaurant bookings!"
-            lower.contains("call mom") || lower.contains("remind") -> "Understood. Created a recurring Sunday 10:00 AM reminder: 'Call Mom' 📞. Added to memories!"
-            lower.contains("clear") || lower.contains("reset") -> "Everything cleared! Clean canvas initiated for your commands."
-            lower.contains("pro") || lower.contains("upgrade") -> "Awesome choice! Panda Pro is active on your device, giving you faster model processing and early feature versions."
-            else -> "Processing complete! Automation action logged in your dashboard. What's next on our agenda?"
         }
     }
 }

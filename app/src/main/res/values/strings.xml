@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Panda AI</string>
+    <string name="accessibility_service_description">Panda AI Assistant provides accessibility support for device automation, screen reading, and voice control integration.</string>
 </resources>

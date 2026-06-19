@@ -5,17 +5,46 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep Room entities and DAOs
+-keep class com.example.data.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep ViewModel and StateFlow
+-keep class com.example.ui.PandaViewModel { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep SystemIntegrations
+-keep class com.example.ui.SystemIntegrations { *; }
+
+# Keep VoiceRecognizer
+-keep class com.example.ui.VoiceRecognizer { *; }
+
+# Keep AccessibilityService
+-keep class com.example.ui.PandaAccessibilityService { *; }
+
+# Keep Compose generated classes
+-keep class androidx.compose.runtime.** { *; }
+-keep class androidx.compose.ui.** { *; }
+
+# Keep Kotlinx Serialization
+-keep class kotlinx.serialization.** { *; }
+-keep class com.example.data.** { *; }
+
+# Keep OkHttp and Moshi
+-keep class okhttp3.** { *; }
+-keep class com.squareup.moshi.** { *; }
+
+# Keep Coroutines
+-keep class kotlinx.coroutines.** { *; }
+
+# Preserve line numbers for debugging
+-keepattributes SourceFile,LineNumberTable
+
+# Keep Parcelable implementations
+-keep class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+# Keep Enum values
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}

@@ -1305,6 +1305,7 @@ fun LiquidGlassInputField(
     placeholderText: String = "Ask Panda anything...",
     onSend: () -> Unit,
     onMicClick: () -> Unit = {},
+    onAttachmentClick: () -> Unit = {},
     showMic: Boolean = true,
     isListening: Boolean = false,
     focusManager: androidx.compose.ui.focus.FocusManager? = null
@@ -1380,7 +1381,7 @@ fun LiquidGlassInputField(
             modifier = Modifier.matchParentSize().padding(start = 8.dp, end = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* Attachment action */ }, modifier = Modifier.size(36.dp)) {
+            IconButton(onClick = onAttachmentClick, modifier = Modifier.size(36.dp)) {
                 androidx.compose.material3.Icon(Icons.Default.AddCircleOutline, null, tint = TextMuted)
             }
             

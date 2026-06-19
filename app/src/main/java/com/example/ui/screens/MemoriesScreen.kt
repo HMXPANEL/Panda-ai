@@ -36,14 +36,20 @@ fun MemoriesScreen(viewModel: PandaViewModel) {
     var activeCategoryFilter by remember { mutableStateOf("All") }
     var entryText by remember { mutableStateOf("") }
     var showAddRow by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showMemoryDetail by remember { mutableStateOf<Memory?>(null) }
 
     // Filter list
-    val filteredMemories = remember(memoriesList, activeCategoryFilter) {
-        if (activeCategoryFilter == "All") {
+    val filteredMemories = remember(memoriesList, activeCategoryFilter, searchQuery) {
+        var list = if (activeCategoryFilter == "All") {
             memoriesList
         } else {
             memoriesList.filter { it.category.equals(activeCategoryFilter, ignoreCase = true) }
         }
+        if (searchQuery.isNotBlank()) {
+            list = list.filter { it.content.lowercase().contains(searchQuery.lowercase()) }
+        }
+        list
     }
 
     Column(
@@ -228,7 +234,7 @@ fun MemoriesScreen(viewModel: PandaViewModel) {
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 items(filteredMemories) { memory ->
-                    MemoryItemRow(memory = memory, onClick = { /* View / Edit */ })
+                    MemoryItemRow(memory = memory, onClick = { showMemoryDetail = memory })
                 }
             }
         }
@@ -241,22 +247,94 @@ fun MemoriesScreen(viewModel: PandaViewModel) {
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)
             ) {
-                Text(
-                    text = "Search memories...",
-                    color = TextMuted,
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f)
+                androidx.compose.material3.TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search memories...", color = TextMuted, fontSize = 14.sp) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp)
+                        .padding(start = 12.dp),
+                    singleLine = true,
+                    textStyle = androidx.compose.ui.text.TextStyle(color = TextPrimary, fontSize = 14.sp),
+                    colors = androidx.compose.material3.TextFieldDefaults.colors(
+                        focusedBorderColor = CyanGlow,
+                        unfocusedBorderColor = Color.Transparent,
+                        cursorColor = CyanGlow,
+                        containerColor = Color.Transparent
+                    )
                 )
                 Icon(
                     imageVector = Icons.Default.Mic,
                     contentDescription = "Voice Search",
                     tint = TextMuted,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp).padding(end = 12.dp)
                 )
             }
         }
+    }
+
+    // Memory Detail Dialog
+    showMemoryDetail?.let { memory ->
+        AlertDialog(
+            onDismissRequest = { showMemoryDetail = null },
+            containerColor = NavyDark,
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Memory Detail", fontWeight = FontWeight.Bold, color = TextPrimary)
+                    IconButton(onClick = { showMemoryDetail = null }) {
+                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextMuted)
+                    }
+                }
+            },
+            text = {
+                Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+                    Text(
+                        text = memory.content,
+                        fontSize = 16.sp,
+                        color = TextPrimary,
+                        lineHeight = 24.sp
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    GlassDivider()
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row {
+                        Text("Category: ", fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 13.sp)
+                        Text(memory.category, color = TextSecondary, fontSize = 13.sp)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val formatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy - hh:mm a").withZone(ZoneId.systemDefault()) }
+                    val dateString = formatter.format(Instant.ofEpochMilli(memory.timestamp))
+                    Row {
+                        Text("Created: ", fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 13.sp)
+                        Text(dateString, color = TextSecondary, fontSize = 13.sp)
+                    }
+                }
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = {
+                        viewModel.deleteMemory(memory)
+                        showMemoryDetail = null
+                    }) {
+                        Text("Delete", color = StatusRed)
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(onClick = { showMemoryDetail = null }) {
+                        Text("Close", color = CyanGlow)
+                    }
+                }
+            }
+        )
     }
 }
 

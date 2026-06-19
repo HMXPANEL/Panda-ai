@@ -19,11 +19,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Intent
+import android.net.Uri
 import com.example.ui.PandaViewModel
 import com.example.ui.components.GlassCard
 import com.example.ui.components.GlassDivider
@@ -53,6 +56,8 @@ fun SettingsScreen(viewModel: PandaViewModel) {
     var showBackgroundSelector by remember { mutableStateOf(false) }
     var showVoiceSelector by remember { mutableStateOf(false) }
     var showAboutView by remember { mutableStateOf(false) }
+    var showLanguageSelector by remember { mutableStateOf(false) }
+    var showPermissionsView by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -201,7 +206,7 @@ fun SettingsScreen(viewModel: PandaViewModel) {
                     title = "Language",
                     trailingText = "English",
                     iconColor = TextPrimary,
-                    onClick = { /* mocked */ }
+                    onClick = { showLanguageSelector = true }
                 )
 
                 GlassDivider()
@@ -211,7 +216,7 @@ fun SettingsScreen(viewModel: PandaViewModel) {
                     icon = Icons.Default.Lock,
                     title = "Permissions",
                     iconColor = TextPrimary,
-                    onClick = { /* mocked */ }
+                    onClick = { showPermissionsView = true }
                 )
 
                 GlassDivider()
@@ -333,8 +338,86 @@ fun SettingsScreen(viewModel: PandaViewModel) {
                                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                                         ) {
                                             Text("PRO", fontSize = 8.sp, color = Color.White, fontWeight = FontWeight.Black)
-                                        }
-                                    }
+    }
+
+    // --- DIALOG: Language Selector ---
+    if (showLanguageSelector) {
+        AlertDialog(
+            onDismissRequest = { showLanguageSelector = false },
+            containerColor = NavyDark,
+            title = { Text("Select Language", color = TextPrimary) },
+            text = {
+                Column {
+                    listOf("English", "Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Hindi").forEach { lang ->
+                        TextButton(
+                            onClick = {
+                                // TODO: Implement language change
+                                showLanguageSelector = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(lang, color = TextPrimary)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageSelector = false }) {
+                    Text("Close", color = CyanGlow)
+                }
+            }
+        )
+    }
+
+    // --- DIALOG: Permissions View ---
+    if (showPermissionsView) {
+        AlertDialog(
+            onDismissRequest = { showPermissionsView = false },
+            containerColor = NavyDark,
+            title = { Text("App Permissions", color = TextPrimary) },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    val permissions = listOf(
+                        "Microphone" to "Record audio for voice commands",
+                        "Notifications" to "Show alerts and reminders",
+                        "Camera" to "Take photos for screen capture",
+                        "Contacts" to "Access contacts for calls/messages",
+                        "Calendar" to "Create and manage events",
+                        "Phone" to "Make direct calls",
+                        "SMS" to "Send text messages",
+                        "Accessibility" to "Interact with other apps",
+                        "Overlay" to "Show floating assistant",
+                        "Location" to "Provide location-based services",
+                        "Storage" to "Read/write files"
+                    )
+                    permissions.forEach { (name, desc) ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .border(1.dp, GlassBorder, RoundedCornerShape(12.dp))
+                                .padding(16.dp)
+                        ) {
+                            Column {
+                                Text(name, fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 14.sp)
+                                Text(desc, fontSize = 12.sp, color = TextSecondary)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPermissionsView = false }) {
+                    Text("Close", color = CyanGlow)
+                }
+            }
+        )
+    }
+}
                                 }
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(text = desc, fontSize = 11.sp, color = TextMuted)
@@ -475,21 +558,42 @@ fun SettingsScreen(viewModel: PandaViewModel) {
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         color = CyanGlow,
-                        modifier = Modifier.clickable { /* TOS Link mock */ }
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://panda-ai.example.com/tos")).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                LocalContext.current.startActivity(intent)
+                            }
                     )
                     Text(
                         text = "Privacy Policy",
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         color = CyanGlow,
-                        modifier = Modifier.clickable { /* Privacy Link mock */ }
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://panda-ai.example.com/privacy")).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                LocalContext.current.startActivity(intent)
+                            }
                     )
                     Text(
                         text = "Open Source Licenses",
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         color = CyanGlow,
-                        modifier = Modifier.clickable { /* Licenses Link mock */ }
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/panda-ai/licenses")).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                LocalContext.current.startActivity(intent)
+                            }
                     )
                 }
             },

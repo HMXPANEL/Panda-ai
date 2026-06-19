@@ -45,37 +45,41 @@ fun HomeScreen(viewModel: PandaViewModel) {
     var textInput by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
+    var drawerState by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp)
-            .verticalScroll(scrollState)
-            .testTag("home_screen_content")
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        // --- 1. Custom Top Greet Bar ---
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+                .verticalScroll(scrollState)
+                .testTag("home_screen_content")
         ) {
-            // Cute menu-icon layout in glass pod
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .border(0.5.dp, GlassBorder, RoundedCornerShape(10.dp))
-                    .clickable { /* Side drawer mock */ },
-                contentAlignment = Alignment.Center
+            // --- 1. Custom Top Greet Bar ---
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "Menu drawer",
-                    tint = TextPrimary
-                )
-            }
+                // Cute menu-icon layout in glass pod
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .border(0.5.dp, GlassBorder, RoundedCornerShape(10.dp))
+                        .clickable { drawerState = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu drawer",
+                        tint = TextPrimary
+                    )
+                }
 
             // Power button indicator
             Box(
@@ -149,7 +153,7 @@ fun HomeScreen(viewModel: PandaViewModel) {
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         ) {
-            com.example.ui.components.LiquidGlassInputField(
+             LiquidGlassInputField(
                 value = textInput,
                 onValueChange = { textInput = it },
                 placeholderText = "Ask Panda anything...",
@@ -164,8 +168,11 @@ fun HomeScreen(viewModel: PandaViewModel) {
                 },
                 onMicClick = {
                     if (aiState == AiState.Idle) {
-                        viewModel.startVoiceListening()
+                        viewModel.startVoiceListening(LocalContext.current)
                     }
+                },
+                onAttachmentClick = {
+                    viewModel.sendMessage("Attachment feature - select file to share")
                 }
             )
         }
@@ -189,7 +196,8 @@ fun HomeScreen(viewModel: PandaViewModel) {
                         title = "Direct Call",
                         iconColor = BlueAccent,
                         onClick = {
-                            com.example.ui.SystemIntegrations.makeDirectCall(context, "1234567890")
+                            viewModel.sendMessage("Call a contact - please specify phone number")
+                            viewModel.selectTab(BottomTab.Chat)
                         }
                     )
                 }
@@ -199,7 +207,8 @@ fun HomeScreen(viewModel: PandaViewModel) {
                         title = "Send SMS",
                         iconColor = CyanGlow,
                         onClick = {
-                            com.example.ui.SystemIntegrations.sendSmsBackground(context, "1234567890", "Hello from Panda!")
+                            viewModel.sendMessage("Send SMS - please specify phone number and message")
+                            viewModel.selectTab(BottomTab.Chat)
                         }
                     )
                 }
@@ -209,7 +218,8 @@ fun HomeScreen(viewModel: PandaViewModel) {
                         title = "Set Alarm",
                         iconColor = TextPrimary,
                         onClick = {
-                            com.example.ui.SystemIntegrations.setAlarmBackground(context, 7, 30, "Wake up!")
+                            viewModel.sendMessage("Set alarm - please specify time (e.g., 7:30 AM)")
+                            viewModel.selectTab(BottomTab.Chat)
                         }
                     )
                 }
@@ -234,8 +244,8 @@ fun HomeScreen(viewModel: PandaViewModel) {
                         title = "Add Event",
                         iconColor = NeonPink,
                         onClick = {
-                            val now = System.currentTimeMillis()
-                            com.example.ui.SystemIntegrations.addCalendarEventSilent(context, "Meeting", "Panda scheduled meeting", now, now + 3600000)
+                            viewModel.sendMessage("Add calendar event - please specify title, description, and time")
+                            viewModel.selectTab(BottomTab.Chat)
                         }
                     )
                 }
@@ -245,7 +255,8 @@ fun HomeScreen(viewModel: PandaViewModel) {
                         title = "Open Maps",
                         iconColor = PurpleAccent,
                         onClick = {
-                            com.example.ui.SystemIntegrations.openMapsSilent(context, "Googleplex")
+                            viewModel.sendMessage("Open Maps - please specify location to search")
+                            viewModel.selectTab(BottomTab.Chat)
                         }
                     )
                 }
@@ -270,7 +281,8 @@ fun HomeScreen(viewModel: PandaViewModel) {
                         title = "Speak",
                         iconColor = SoftAmber,
                         onClick = {
-                            com.example.ui.SystemIntegrations.speakText(context, "Hello, I am fully autonomous!")
+                            viewModel.sendMessage("Speak text - please specify what to say")
+                            viewModel.selectTab(BottomTab.Chat)
                         }
                     )
                 }
@@ -295,7 +307,8 @@ fun HomeScreen(viewModel: PandaViewModel) {
                         title = "Copy Text",
                         iconColor = BlueAccent,
                         onClick = {
-                            com.example.ui.SystemIntegrations.copyToClipboard(context, "Panda is awesome!")
+                            viewModel.sendMessage("Copy text to clipboard - please specify text to copy")
+                            viewModel.selectTab(BottomTab.Chat)
                         }
                     )
                 }
@@ -318,9 +331,89 @@ fun HomeScreen(viewModel: PandaViewModel) {
                             com.example.ui.SystemIntegrations.maximizeVolume(context)
                         }
                     )
+        }
+    }
+
+    // Side Drawer
+    if (drawerState) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+                .clickable { drawerState = false }
+        ) {
+            MediumLiquidGlassCard(
+                modifier = Modifier
+                    .width(280.dp)
+                    .fillMaxHeight()
+                    .padding(16.dp),
+                cornerRadius = 24.dp,
+                glowColor = CyanGlow,
+                enableGlow = true
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Menu", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = TextPrimary)
+                        IconButton(onClick = { drawerState = false }) {
+                            Icon(Icons.Default.Close, contentDescription = "Close", tint = TextMuted)
+                        }
+                    }
+                    GlassDivider()
+
+                    // Menu Items
+                    listOf(
+                        "Home" to Icons.Default.Home to BottomTab.Home,
+                        "Chat" to Icons.Default.Chat to BottomTab.Chat,
+                        "Tools" to Icons.Default.Build to BottomTab.Tools,
+                        "Memories" to Icons.Default.Psychology to null,
+                        "Settings" to Icons.Default.Settings to BottomTab.Settings
+                    ).forEach { (title, icon, tab) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { 
+                                    drawerState = false 
+                                    tab?.let { viewModel.selectTab(it) }
+                                    if (title == "Memories") {
+                                        // Navigate to Memories - we'll use a different approach
+                                        // For now, show a message and route through chat
+                                        viewModel.sendMessage("Show my memories")
+                                        viewModel.selectTab(BottomTab.Chat)
+                                    }
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(icon, contentDescription = null, tint = CyanGlow, modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+                    GlassDivider()
+
+                    // User Info
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("Signed in as", fontSize = 12.sp, color = TextMuted)
+                        Text(userName, fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 16.sp)
+                        Text("Panda AI v1.1.0", fontSize = 11.sp, color = TextSubtle)
+                    }
                 }
             }
         }
+    }
+}
     }
 }
 

@@ -19,11 +19,16 @@ import android.content.ClipboardManager
 import android.content.ClipData
 import android.content.IntentFilter
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
+import android.net.wifi.WifiManager
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 object SystemIntegrations {
 
-    private var tts: TextToSpeech? = null
+    private val ttsInstances = ConcurrentHashMap<Context, TextToSpeech>()
     private var isFlashlightOn = false
 
     // 1. Set Alarm in Background (No UI opened if possible, some OEM clock apps still open but this is the closest intent)
@@ -126,17 +131,27 @@ object SystemIntegrations {
     }
 
     fun speakText(context: Context, text: String) {
-        if (tts == null) {
-            tts = TextToSpeech(context.applicationContext) { status ->
+        val appContext = context.applicationContext
+        val tts = ttsInstances.computeIfAbsent(appContext) { ctx ->
+            TextToSpeech(ctx) { status ->
                 if (status == TextToSpeech.SUCCESS) {
-                    tts?.language = Locale.US
-                    tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+                    this@computeIfAbsent.language = Locale.US
                 }
             }
-        } else {
-            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+        }
+        
+        if (tts.isLanguageAvailable(Locale.US) >= TextToSpeech.LANG_AVAILABLE) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "panda_tts_${System.currentTimeMillis()}")
         }
         Toast.makeText(context, "Speaking: $text", Toast.LENGTH_SHORT).show()
+    }
+
+    fun shutdownTTS(context: Context) {
+        val appContext = context.applicationContext
+        ttsInstances.remove(appContext)?.let { tts ->
+            tts.stop()
+            tts.shutdown()
+        }
     }
 
     fun maximizeVolume(context: Context) {
@@ -187,6 +202,54 @@ object SystemIntegrations {
             Toast.makeText(context, "Copied to clipboard!", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(context, "Clipboard failed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun toggleWifi(context: Context, enable: Boolean): Boolean {
+        try {
+            val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            val result = wifiManager.setWifiEnabled(enable)
+            Toast.makeText(context, "Wi-Fi ${if (enable) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+            return result
+        } catch (e: Exception) {
+            Toast.makeText(context, "Wi-Fi toggle failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            return false
+        }
+    }
+
+    fun isWifiEnabled(context: Context): Boolean {
+        try {
+            val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return wifiManager.isWifiEnabled
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    fun toggleBluetooth(context: Context, enable: Boolean): Boolean {
+        try {
+            val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val bluetoothAdapter = bluetoothManager.adapter
+            if (bluetoothAdapter == null) {
+                Toast.makeText(context, "Bluetooth not supported", Toast.LENGTH_SHORT).show()
+                return false
+            }
+            val result = if (enable) bluetoothAdapter.enable() else bluetoothAdapter.disable()
+            Toast.makeText(context, "Bluetooth ${if (enable) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+            return result
+        } catch (e: Exception) {
+            Toast.makeText(context, "Bluetooth toggle failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            return false
+        }
+    }
+
+    fun isBluetoothEnabled(context: Context): Boolean {
+        try {
+            val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val bluetoothAdapter = bluetoothManager.adapter
+            return bluetoothAdapter?.isEnabled == true
+        } catch (e: Exception) {
+            return false
         }
     }
 }

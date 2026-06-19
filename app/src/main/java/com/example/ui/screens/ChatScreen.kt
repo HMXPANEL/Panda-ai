@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -100,7 +101,7 @@ fun ChatScreen(viewModel: PandaViewModel) {
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .padding(bottom = 8.dp)
         ) {
-            com.example.ui.components.LiquidGlassInputField(
+             LiquidGlassInputField(
                 value = chatInput,
                 onValueChange = { chatInput = it },
                 placeholderText = "Message Panda...",
@@ -113,8 +114,11 @@ fun ChatScreen(viewModel: PandaViewModel) {
                 },
                 onMicClick = {
                     if (aiState == AiState.Idle) {
-                        viewModel.startVoiceListening()
+                        viewModel.startVoiceListening(LocalContext.current)
                     }
+                },
+                onAttachmentClick = {
+                    viewModel.sendMessage("Attachment feature - select file to share")
                 }
             )
         }

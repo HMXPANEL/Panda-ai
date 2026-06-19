@@ -73,7 +73,6 @@ fun MainAppContainer(viewModel: PandaViewModel) {
                         BottomTab.Home -> HomeScreen(viewModel = viewModel)
                         BottomTab.Chat -> ChatScreen(viewModel = viewModel)
                         BottomTab.Tools -> ToolsScreen(viewModel = viewModel)
-                        BottomTab.Memories -> MemoriesScreen(viewModel = viewModel)
                         BottomTab.Settings -> SettingsScreen(viewModel = viewModel)
                     }
                 }
@@ -125,13 +124,6 @@ fun FloatingGlassNavigationBar(
                     label = "Tools",
                     isSelected = selectedTab == BottomTab.Tools,
                     onClick = { onTabSelected(BottomTab.Tools) }
-                )
-                NavBarItem(
-                    tab = BottomTab.Memories,
-                    icon = Icons.Default.Psychology,
-                    label = "Memories",
-                    isSelected = selectedTab == BottomTab.Memories,
-                    onClick = { onTabSelected(BottomTab.Memories) }
                 )
                 NavBarItem(
                     tab = BottomTab.Settings,

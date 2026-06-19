@@ -47,7 +47,7 @@ object GeminiNetwork {
     fun queryGeminiStream(prompt: String, userApiKey: String = "", activeModel: String = "gemini-2.0-flash"): Flow<String> = flow {
         val actualKey = userApiKey.ifEmpty { BuildConfig.GEMINI_API_KEY }
         if (actualKey.isEmpty() || actualKey == "MY_GEMINI_API_KEY") {
-            emit("DEMO_PLACEHOLDER")
+            emit("Error: No valid Gemini API key configured. Please add your API key in Settings.")
             return@flow
         }
 
