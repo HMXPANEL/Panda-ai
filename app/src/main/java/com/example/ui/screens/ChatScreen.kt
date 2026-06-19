@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.AiState
 import com.example.data.ChatMessage
 import com.example.ui.PandaViewModel
+import com.example.ui.PendingDangerousAction
 import com.example.ui.components.*
 import com.example.ui.theme.*
 import kotlinx.coroutines.launch
@@ -43,11 +44,51 @@ fun ChatScreen(viewModel: PandaViewModel) {
     val aiState by viewModel.aiState.collectAsState()
     val userName by viewModel.userName.collectAsState()
 
+    val pendingAction by viewModel.pendingAction.collectAsState()
+
     var chatInput by remember { mutableStateOf("") }
     val context = LocalContext.current
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+
+    // Dangerous action confirmation dialog
+    if (pendingAction != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.cancelPendingAction() },
+            title = {
+                Text("⚠️ Confirm Action", fontWeight = FontWeight.Bold, color = Color(0xFFFFA726))
+            },
+            text = {
+                Column {
+                    Text("Panda wants to:", fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(pendingAction!!.description, color = Color.White.copy(alpha = 0.8f))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("Do you want to proceed?", fontWeight = FontWeight.Medium)
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.sendMessage("yes")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50)
+                    )
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.cancelPendingAction() }) {
+                    Text("Cancel", color = Color.White.copy(alpha = 0.6f))
+                }
+            },
+            containerColor = Color(0xFF1A1A2E),
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
 
     // Automatically scroll to the end on new message insertions
     LaunchedEffect(messages.size, aiState) {

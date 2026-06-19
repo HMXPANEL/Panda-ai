@@ -31,6 +31,9 @@ interface PandaDao {
     @Query("SELECT * FROM memories ORDER BY timestamp DESC")
     fun getAllMemoriesFlow(): Flow<List<Memory>>
 
+    @Query("SELECT * FROM memories ORDER BY timestamp DESC")
+    fun getAllMemoriesSync(): List<Memory>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMemory(memory: Memory)
 
@@ -85,6 +88,8 @@ abstract class PandaDatabase : RoomDatabase() {
 class PandaRepository(private val dao: PandaDao) {
     val allMemories: Flow<List<Memory>> = dao.getAllMemoriesFlow()
     val allMessages: Flow<List<ChatMessage>> = dao.getAllMessagesFlow()
+
+    fun getAllMemoriesSync(): List<Memory> = dao.getAllMemoriesSync()
 
     suspend fun insertMemory(memory: Memory) = dao.insertMemory(memory)
     suspend fun deleteMemory(memory: Memory) = dao.deleteMemory(memory)
