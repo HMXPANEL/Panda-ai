@@ -416,6 +416,9 @@ fun HomeScreen(viewModel: PandaViewModel) {
             }
         }
     }
+    }
+    }
+    }
 }
 
 @Composable

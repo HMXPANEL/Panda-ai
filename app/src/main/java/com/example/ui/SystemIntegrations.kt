@@ -133,11 +133,13 @@ object SystemIntegrations {
     fun speakText(context: Context, text: String) {
         val appContext = context.applicationContext
         val tts = ttsInstances.computeIfAbsent(appContext) { ctx ->
-            TextToSpeech(ctx) { status ->
+            var ttsRef: TextToSpeech? = null
+            ttsRef = TextToSpeech(ctx) { status ->
                 if (status == TextToSpeech.SUCCESS) {
-                    this.setLanguage(Locale.US)
+                    ttsRef?.setLanguage(Locale.US)
                 }
             }
+            ttsRef!!
         }
         
         if (tts.isLanguageAvailable(Locale.US) >= TextToSpeech.LANG_AVAILABLE) {
