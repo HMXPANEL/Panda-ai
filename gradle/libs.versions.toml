@@ -29,9 +29,6 @@ robolectric = "4.16.1"
 roborazzi = "1.59.0"
 secretsGradlePlugin = "2.0.1"
 accompanistPermissions = "0.37.3"
-speechRecognizer = "1.0.0"
-wifiManager = "1.0.0"
-bluetoothManager = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -70,9 +67,6 @@ roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", versi
 roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }
 roborazzi-junit-rule = { group = "io.github.takahirom.roborazzi", name = "roborazzi-junit-rule", version.ref = "roborazzi" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
-androidx-speech = { group = "androidx.speech", name = "speech", version.ref = "speechRecognizer" }
-androidx-wifi = { group = "androidx.net.wifi", name = "wifi", version.ref = "wifiManager" }
-androidx-bluetooth = { group = "androidx.bluetooth", name = "bluetooth", version.ref = "bluetoothManager" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
