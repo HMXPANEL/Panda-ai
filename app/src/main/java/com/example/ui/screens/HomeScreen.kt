@@ -417,8 +417,6 @@ fun HomeScreen(viewModel: PandaViewModel) {
         }
     }
 }
-    }
-}
 
 @Composable
 fun QuickActionCard(

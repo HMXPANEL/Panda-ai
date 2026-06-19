@@ -21,7 +21,9 @@ class VoiceRecognizer(private val context: Context) {
 
     fun startListening(): ReceiveChannel<String> {
         if (isListening) {
-            return Channel(Channel.UNLIMITED).also { it.close() }
+            val ch = Channel<String>(Channel.UNLIMITED)
+            ch.close()
+            return ch
         }
 
         listeningChannel = Channel(Channel.UNLIMITED)

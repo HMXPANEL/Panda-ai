@@ -135,7 +135,7 @@ object SystemIntegrations {
         val tts = ttsInstances.computeIfAbsent(appContext) { ctx ->
             TextToSpeech(ctx) { status ->
                 if (status == TextToSpeech.SUCCESS) {
-                    this.language = Locale.US
+                    this.setLanguage(Locale.US)
                 }
             }
         }
