@@ -10,7 +10,6 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.view.accessibility.AccessibilityNodeInfo.Companion.ACTION_ARGUMENT_ROW_INT
 import android.view.WindowManager
 import kotlinx.coroutines.delay
 
@@ -376,6 +375,14 @@ class PandaAccessibilityService : AccessibilityService() {
     fun performGlobalHome(): Boolean = performGlobalAction(GLOBAL_ACTION_HOME)
     fun performGlobalRecents(): Boolean = performGlobalAction(GLOBAL_ACTION_RECENTS)
     fun performGlobalNotifications(): Boolean = performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS)
-    fun performGlobalScrollForward(): Boolean = performGlobalAction(GLOBAL_ACTION_SCROLL_FORWARD)
-    fun performGlobalScrollBackward(): Boolean = performGlobalAction(GLOBAL_ACTION_SCROLL_BACKWARD)
+    fun performGlobalScrollForward(): Boolean {
+        val root = rootInActiveWindow ?: return false
+        val scrollable = findNodeRecursive(root) { it.isScrollable }
+        return scrollable?.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) ?: false
+    }
+    fun performGlobalScrollBackward(): Boolean {
+        val root = rootInActiveWindow ?: return false
+        val scrollable = findNodeRecursive(root) { it.isScrollable }
+        return scrollable?.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) ?: false
+    }
 }
