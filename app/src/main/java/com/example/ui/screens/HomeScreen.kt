@@ -46,6 +46,7 @@ fun HomeScreen(viewModel: PandaViewModel) {
     val aiState by viewModel.aiState.collectAsState()
 
     var textInput by remember { mutableStateOf("") }
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
     var drawerState by remember { mutableStateOf(false) }
@@ -171,7 +172,7 @@ fun HomeScreen(viewModel: PandaViewModel) {
                 },
                 onMicClick = {
                     if (aiState == AiState.Idle) {
-                        viewModel.startVoiceListening(LocalContext.current)
+                        viewModel.startVoiceListening(context)
                     }
                 },
                 onAttachmentClick = {
@@ -181,7 +182,6 @@ fun HomeScreen(viewModel: PandaViewModel) {
         }
 
         // --- 5. Quick Trigger Cards Grid ---
-        val context = LocalContext.current
         val gridSpacing = 12.dp
         Column(
             modifier = Modifier
@@ -373,11 +373,11 @@ fun HomeScreen(viewModel: PandaViewModel) {
 
                     // Menu Items
                     listOf(
-                        "Home" to Icons.Default.Home to BottomTab.Home,
-                        "Chat" to Icons.Default.Chat to BottomTab.Chat,
-                        "Tools" to Icons.Default.Build to BottomTab.Tools,
-                        "Memories" to Icons.Default.Psychology to null,
-                        "Settings" to Icons.Default.Settings to BottomTab.Settings
+                        Triple("Home", Icons.Default.Home, BottomTab.Home),
+                        Triple("Chat", Icons.Default.Chat, BottomTab.Chat),
+                        Triple("Tools", Icons.Default.Build, BottomTab.Tools),
+                        Triple("Memories", Icons.Default.Psychology, null),
+                        Triple("Settings", Icons.Default.Settings, BottomTab.Settings)
                     ).forEach { (title, icon, tab) ->
                         Row(
                             modifier = Modifier

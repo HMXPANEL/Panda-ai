@@ -260,10 +260,11 @@ fun MemoriesScreen(viewModel: PandaViewModel) {
                     singleLine = true,
                     textStyle = androidx.compose.ui.text.TextStyle(color = TextPrimary, fontSize = 14.sp),
                     colors = androidx.compose.material3.TextFieldDefaults.colors(
-                        focusedBorderColor = CyanGlow,
-                        unfocusedBorderColor = Color.Transparent,
+                        focusedIndicatorColor = CyanGlow,
+                        unfocusedIndicatorColor = Color.Transparent,
                         cursorColor = CyanGlow,
-                        containerColor = Color.Transparent
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
                     )
                 )
                 Icon(

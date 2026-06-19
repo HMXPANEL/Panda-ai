@@ -35,6 +35,7 @@ import com.example.ui.theme.*
 @Composable
 fun SettingsScreen(viewModel: PandaViewModel) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
     // State bindings
     val userName by viewModel.userName.collectAsState()
@@ -564,7 +565,7 @@ fun SettingsScreen(viewModel: PandaViewModel) {
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://panda-ai.example.com/tos")).apply {
                                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 }
-                                LocalContext.current.startActivity(intent)
+                                context.startActivity(intent)
                             }
                     )
                     Text(
@@ -578,7 +579,7 @@ fun SettingsScreen(viewModel: PandaViewModel) {
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://panda-ai.example.com/privacy")).apply {
                                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 }
-                                LocalContext.current.startActivity(intent)
+                                context.startActivity(intent)
                             }
                     )
                     Text(
@@ -592,7 +593,7 @@ fun SettingsScreen(viewModel: PandaViewModel) {
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/panda-ai/licenses")).apply {
                                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 }
-                                LocalContext.current.startActivity(intent)
+                                context.startActivity(intent)
                             }
                     )
                 }

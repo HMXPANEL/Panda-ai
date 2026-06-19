@@ -44,6 +44,7 @@ fun ChatScreen(viewModel: PandaViewModel) {
     val userName by viewModel.userName.collectAsState()
 
     var chatInput by remember { mutableStateOf("") }
+    val context = LocalContext.current
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -114,7 +115,7 @@ fun ChatScreen(viewModel: PandaViewModel) {
                 },
                 onMicClick = {
                     if (aiState == AiState.Idle) {
-                        viewModel.startVoiceListening(LocalContext.current)
+                        viewModel.startVoiceListening(context)
                     }
                 },
                 onAttachmentClick = {

@@ -43,7 +43,7 @@ class VoiceRecognizer(private val context: Context) {
 
             override fun onRmsChanged(rmsdB: Float) {}
 
-            override fun onBufferReceived(buffer: android.os.Bundle) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
 
             override fun onEndOfSpeech() {
                 Log.d("VoiceRecognizer", "End of speech")
